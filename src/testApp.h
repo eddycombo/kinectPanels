@@ -4,8 +4,6 @@
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
 
-// uncomment this to read from two kinects simultaneously
-//#define USE_TWO_KINECTS
 
 class testApp : public ofBaseApp {
 public:
@@ -24,7 +22,7 @@ public:
 	void windowResized(int w, int h);
 
 	ofxKinect kinect;
-  ofxCvGrayscaleImage grayImage, bgImage, diffImage; // grayscale depth image
+  ofxCvGrayscaleImage grayImage, bgImage, diffImage, warpedImage; // grayscale depth image
 
 
   ofImage savedFrontGradient, savedBackGradient;
@@ -51,6 +49,13 @@ public:
   void computePanels(ofxCvGrayscaleImage & gray, ofxCvGrayscaleImage & frontGradient, ofxCvGrayscaleImage & backGradient, int & near1, int & near2, int & far1, int & far2);
   void isPixelBetweenPanels(ofxCvGrayscaleImage & gray, ofxCvGrayscaleImage & frontGradient, ofxCvGrayscaleImage & backGradient);
   void drawGoodPoints(ofxCvGrayscaleImage & gray);
+
+  void drawKeystone();
+  //warp stuff
+  ofPoint *				srcPositions;
+  ofPoint *				dstPositions;
+  bool wichPoints;
+
 
 
 };

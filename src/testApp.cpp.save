@@ -17,12 +17,13 @@ void testApp::setup() {
   grayImage.allocate(kinect.width, kinect.height);
   frontPanelGradient.allocate(kinect.width, kinect.height);
   backPanelGradient.allocate(kinect.width, kinect.height);
+  warpedImage.allocate(kinect.width, kinect.height);
 
   savedFrontGradient.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
   savedBackGradient.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
 
-	nearThreshold = 255;
-  farThreshold = 215;
+	nearThreshold = 238;
+  farThreshold = 137;
   panelsDiff = 100;
 
     farThreshold2 = farThreshold - panelsDiff;
@@ -47,21 +48,21 @@ void testApp::setup() {
     refPoint.x = panelsCtls[0].x;
     refPoint.y = 0;
 
-    /*
-    gThreshNear.x = ofMap(nearThreshold, 0, 255, 480, 0);
-    gThreshNear.y = 512;
+    checkAngle = false;
 
-    gThreshFar.x = ofMap(farThreshold, 0, 255, 480, 0);
-    gThreshFar.y = 0;
+    //keyStone
+    srcPositions  = new ofPoint[4];
+    srcPositions[0].set(0, 0, 0);
+    srcPositions[1].set(kinect.width, 0, 0);
+    srcPositions[2].set(kinect.width, kinect.height, 0);
+    srcPositions[3].set(0, kinect.height, 0);
 
+    dstPositions  = new ofPoint[4];
+    dstPositions[0].set(0, 0, 0);
+    dstPositions[1].set(kinect.width, 0, 0);
+    dstPositions[2].set(kinect.width, kinect.height, 0);
+    dstPositions[3].set(0, kinect.height, 0);
 
-    gThresh2Near.x = ofMap(nearThreshold2, 0, 255, 480, 0);
-    gThresh2Near.y = 512;
-    gThresh2Far.x = ofMap(farThreshold2, 0, 255, 480, 0);
-    gThresh2Far.y = 0;
-    */
-
-  checkAngle = false;
 }
 
 
@@ -116,6 +117,28 @@ void drawGoodPoints(ofxCvGrayscaleImage & gray){
 
 }
 
+void testApp::drawKeystone(){
+
+
+  // Draw keyStone
+	ofSetColor(255);
+	ofNoFill();
+
+	ofBeginShape();
+	for (int j = 0; j < 4; j++){
+		ofVertex(srcPositions[j].x, srcPositions[j].y);
+	}
+	ofEndShape(true);
+
+	// Draw points
+	ofFill();
+	ofSetColor(255);
+	for (int j = 0; j < 4; j++){
+		ofCircle(srcPositions[j].x, srcPositions[j].y, 3);
+	}
+
+}
+
 //--------------------------------------------------------------
 void testApp::update() {
 
@@ -127,8 +150,8 @@ void testApp::update() {
     panelsCtls[2].x = ofMap(nearThreshold2, 0, 255, 480, 0);
     panelsCtls[3].x = ofMap(farThreshold2, 0, 255, 480, 0);
 
-    
-   if(checkAngle){ 
+
+   if(checkAngle){
     refPoint.x = panelsCtls[0].x;
     refVec.x = refPoint.x;
     refVec.y = refPoint.y;
@@ -144,7 +167,7 @@ void testApp::update() {
     kAngle = tan(ofDegToRad(30));
    }
 
-   
+
     kinect.update();
 
 
@@ -154,7 +177,8 @@ void testApp::update() {
 
         computePanels(grayImage, frontPanelGradient, backPanelGradient, nearThreshold, nearThreshold2, farThreshold, farThreshold2);
         isPixelBetweenPanels(grayImage, frontPanelGradient, backPanelGradient);
-
+        
+        warpedImage.warpIntoMe(grayImage, srcPositions, dstPositions);
     }
 
 }
@@ -170,16 +194,17 @@ void testApp::draw() {
         ofCircle(panelsCtls[0], 10);
         ofCircle(panelsCtls[1], 10);
 
-        
-        
-       if(checkAngle){ 
+        drawKeystone();
+
+
+       if(checkAngle){
           ofSetColor(255, 0 , 0);
           ofCircle(refPoint, 10);
           ofLine(refPoint, panelsCtls[0]);
           ofSetColor(255, 255, 255);
-          
-          ofDrawBitmapString(ofToString(corrAngle)+" "+ofToString(kAngle), panelsCtls[0].x+20, panelsCtls[0].y+20);
-       
+
+          ofDrawBitmapString(ofToString(corrAngle)+" "+ofToString(kAngle), panelsCtls[0].x+20, panelsCtls[0].y-40);
+
        }
         grayImage.draw(960, 0, 320, 240);
 
@@ -195,12 +220,14 @@ void testApp::draw() {
         ofDrawBitmapString("BACK "+ ofToString(farThreshold2) + " "+  ofToString(nearThreshold2), 970, 250);
         ofSetColor(255, 255, 255);
 
+        ofDrawBitmapString("press SPACE to save", 650, 500);
+
 	}
 
 
 //--------------------------------------------------------------
 void testApp::exit() {
-	
+
 	kinect.close();
 
 }
@@ -208,7 +235,9 @@ void testApp::exit() {
 //--------------------------------------------------------------
 void testApp::keyPressed (int key) {
 	switch (key) {
-        case
+        case 'a':
+          checkAngle = !checkAngle;
+        break;
 
         case ' ':
           savedFrontGradient.setFromPixels(frontPanelGradient.getPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
@@ -218,10 +247,10 @@ void testApp::keyPressed (int key) {
           savedBackGradient.saveImage("/home/ekko/Desktop/back.png", OF_IMAGE_QUALITY_BEST);
         break;
 
-        case 'e':
+        case 'r':
             panelsDiff ++;
         break;
-        case 'r':
+        case 'e':
         if(nearThreshold2 < nearThreshold && farThreshold2 < farThreshold ){
 
                 panelsDiff -= 1;

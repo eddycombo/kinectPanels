@@ -17,6 +17,7 @@ void testApp::setup() {
   grayImage.allocate(kinect.width, kinect.height);
   frontPanelGradient.allocate(kinect.width, kinect.height);
   backPanelGradient.allocate(kinect.width, kinect.height);
+  warpedImage.allocate(kinect.width, kinect.height);
 
   savedFrontGradient.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
   savedBackGradient.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
@@ -47,21 +48,23 @@ void testApp::setup() {
     refPoint.x = panelsCtls[0].x;
     refPoint.y = 0;
 
-    /*
-    gThreshNear.x = ofMap(nearThreshold, 0, 255, 480, 0);
-    gThreshNear.y = 512;
+    checkAngle = false;
 
-    gThreshFar.x = ofMap(farThreshold, 0, 255, 480, 0);
-    gThreshFar.y = 0;
+    //keyStone
+    srcPositions  = new ofPoint[4];
+    srcPositions[0].set(0, 0, 0);
+    srcPositions[1].set(kinect.width, 0, 0);
+    srcPositions[2].set(kinect.width, kinect.height, 0);
+    srcPositions[3].set(0, kinect.height, 0);
 
+    dstPositions  = new ofPoint[4];
+    dstPositions[0].set(0, 0, 0);
+    dstPositions[1].set(kinect.width, 0, 0);
+    dstPositions[2].set(kinect.width, kinect.height, 0);
+    dstPositions[3].set(0, kinect.height, 0);
 
-    gThresh2Near.x = ofMap(nearThreshold2, 0, 255, 480, 0);
-    gThresh2Near.y = 512;
-    gThresh2Far.x = ofMap(farThreshold2, 0, 255, 480, 0);
-    gThresh2Far.y = 0;
-    */
+   wichPoints = true;
 
-  checkAngle = false;
 }
 
 
@@ -116,10 +119,30 @@ void drawGoodPoints(ofxCvGrayscaleImage & gray){
 
 }
 
+void testApp::drawKeystone(){
+
+
+  // Draw keyStone
+	ofSetColor(255);
+	ofNoFill();
+
+	ofBeginShape();
+	for (int j = 0; j < 4; j++){
+		ofVertex(srcPositions[j].x, srcPositions[j].y);
+	}
+	ofEndShape(true);
+
+	// Draw points
+	ofFill();
+	ofSetColor(255);
+	for (int j = 0; j < 4; j++){
+		ofCircle(srcPositions[j].x, srcPositions[j].y, 3);
+	}
+
+}
+
 //--------------------------------------------------------------
 void testApp::update() {
-
-
 
     nearThreshold2 = nearThreshold - panelsDiff;
     farThreshold2 = farThreshold - panelsDiff;
@@ -155,6 +178,7 @@ void testApp::update() {
         computePanels(grayImage, frontPanelGradient, backPanelGradient, nearThreshold, nearThreshold2, farThreshold, farThreshold2);
         isPixelBetweenPanels(grayImage, frontPanelGradient, backPanelGradient);
 
+        warpedImage.warpIntoMe(grayImage, srcPositions, dstPositions);
     }
 
 }
@@ -170,6 +194,7 @@ void testApp::draw() {
         ofCircle(panelsCtls[0], 10);
         ofCircle(panelsCtls[1], 10);
 
+        drawKeystone();
 
 
        if(checkAngle){
@@ -181,8 +206,8 @@ void testApp::draw() {
           ofDrawBitmapString(ofToString(corrAngle)+" "+ofToString(kAngle), panelsCtls[0].x+20, panelsCtls[0].y-40);
 
        }
-        grayImage.draw(960, 0, 320, 240);
-
+        //grayImage.draw(960, 0, 320, 240);
+        warpedImage.draw(960, 0, 320, 240);
 
         kinect.drawDepth(640, 0, 320, 240);
         ofDrawBitmapString("DEPTH", 650, 10);
@@ -222,7 +247,7 @@ void testApp::keyPressed (int key) {
           savedBackGradient.saveImage("/home/ekko/Desktop/back.png", OF_IMAGE_QUALITY_BEST);
         break;
 
-        case 'r':
+        case 't':
             panelsDiff ++;
         break;
         case 'e':
@@ -245,6 +270,43 @@ void testApp::keyPressed (int key) {
           kinectAngle--;
           if(kinectAngle<-30) kinectAngle=-30;
           kinect.setCameraTiltAngle(kinectAngle);
+        break;
+
+        case OF_KEY_LEFT:
+
+
+            if(wichPoints){
+              srcPositions[2].x += 1;
+              srcPositions[3].x -= 1;
+
+            }else{
+              srcPositions[0].x += 1;
+              srcPositions[1].x -= 1;
+            }
+        break;
+        case OF_KEY_RIGHT:
+
+            if(wichPoints){
+
+              srcPositions[2].x -= 1;
+              srcPositions[3].x += 1;
+
+
+            }else{
+
+              srcPositions[0].x -= 1;
+              srcPositions[1].x += 1;
+
+            }
+        break;
+        case 'y':
+          wichPoints = !wichPoints;
+        break;
+        case 'r':
+          srcPositions[0].set(0, 0, 0);
+          srcPositions[1].set(kinect.width, 0, 0);
+          srcPositions[2].set(kinect.width, kinect.height, 0);
+          srcPositions[3].set(0, kinect.height, 0);
         break;
       }
 }

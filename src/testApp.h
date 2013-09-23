@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
+#include "ofxXmlSettings.h"
+
 
 
 class testApp : public ofBaseApp {
@@ -56,6 +58,7 @@ public:
   ofPoint *				dstPositions;
   bool wichPoints;
 
+  ofxXmlSettings          XML;
 
 
 };

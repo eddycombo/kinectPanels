@@ -367,7 +367,9 @@ obj/linux/Debug/src/main.o: src/main.cpp src/testApp.h \
  ../../../addons/ofxKinect/src/ofxKinect.h \
  ../../../addons/ofxKinect/libs/libfreenect/include/libfreenect.h \
  ../../../addons/ofxKinect/src/ofxBase3DVideo.h \
- /usr/include/libusb-1.0/libusb.h
+ /usr/include/libusb-1.0/libusb.h \
+ ../../../addons/ofxXmlSettings/src/ofxXmlSettings.h \
+ ../../../addons/ofxXmlSettings/libs/tinyxml.h
 
 src/testApp.h:
 
@@ -1140,3 +1142,7 @@ src/testApp.h:
 ../../../addons/ofxKinect/src/ofxBase3DVideo.h:
 
 /usr/include/libusb-1.0/libusb.h:
+
+../../../addons/ofxXmlSettings/src/ofxXmlSettings.h:
+
+../../../addons/ofxXmlSettings/libs/tinyxml.h:

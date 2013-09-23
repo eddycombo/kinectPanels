@@ -51,11 +51,25 @@ void testApp::setup() {
     checkAngle = false;
 
     //keyStone
+
+    if( XML.loadFile("corners.xml") ){
+              cout<<"XML loaded"<<endl;
+            }else{
+              cout<<"unable to load XML"<<endl;
+    }
+
+    /*
     srcPositions  = new ofPoint[4];
     srcPositions[0].set(0, 0, 0);
     srcPositions[1].set(kinect.width, 0, 0);
     srcPositions[2].set(kinect.width, kinect.height, 0);
     srcPositions[3].set(0, kinect.height, 0);
+    */
+    srcPositions  = new ofPoint[4];
+    srcPositions[0].set(XML.getValue("SRC:X1", 0), XML.getValue("SRC:Y1", 0), 0);
+    srcPositions[1].set(XML.getValue("SRC:X2", kinect.width), XML.getValue("SRC:Y2", 0), 0);
+    srcPositions[2].set(XML.getValue("SRC:X3", kinect.width), XML.getValue("SRC:Y3", kinect.height), 0);
+    srcPositions[3].set(XML.getValue("SRC:X4", 0), XML.getValue("SRC:Y4", kinect.height), 0);
 
     dstPositions  = new ofPoint[4];
     dstPositions[0].set(0, 0, 0);
@@ -245,6 +259,18 @@ void testApp::keyPressed (int key) {
 
           savedFrontGradient.saveImage("/home/ekko/Desktop/front.png", OF_IMAGE_QUALITY_BEST);
           savedBackGradient.saveImage("/home/ekko/Desktop/back.png", OF_IMAGE_QUALITY_BEST);
+
+          XML.setValue("SRC:X1", srcPositions[0].x);
+
+            XML.setValue("SRC:Y1", srcPositions[0].y);
+            XML.setValue("SRC:X2", srcPositions[1].x);
+            XML.setValue("SRC:Y2", srcPositions[1].y);
+            XML.setValue("SRC:X3", srcPositions[2].x);
+            XML.setValue("SRC:Y3", srcPositions[2].y);
+            XML.setValue("SRC:X4", srcPositions[3].x);
+            XML.setValue("SRC:Y4", srcPositions[3].y);
+
+            XML.saveFile("corners.xml");
         break;
 
         case 't':
@@ -308,6 +334,7 @@ void testApp::keyPressed (int key) {
           srcPositions[2].set(kinect.width, kinect.height, 0);
           srcPositions[3].set(0, kinect.height, 0);
         break;
+
       }
 }
 

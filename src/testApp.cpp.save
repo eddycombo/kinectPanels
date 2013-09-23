@@ -51,17 +51,33 @@ void testApp::setup() {
     checkAngle = false;
 
     //keyStone
+    
+    if( XML.loadFile("corners.xml") ){
+              cout<<"XML loaded"<<endl;
+            }else{
+              cout<<"unable to load XML"<<endl;
+    }
+    
+    
     srcPositions  = new ofPoint[4];
     srcPositions[0].set(0, 0, 0);
     srcPositions[1].set(kinect.width, 0, 0);
     srcPositions[2].set(kinect.width, kinect.height, 0);
     srcPositions[3].set(0, kinect.height, 0);
+    
+    
+    srcPositions[0].set(XML.getValue("SRC:X1", xVidPos), XML.getValue("SRC:Y1", yVidPos), 0);
+	srcPositions[1].set(XML.getValue("SRC:X2", camW + xVidPos), XML.getValue("SRC:Y2", yVidPos), 0);
+	srcPositions[2].set(XML.getValue("SRC:X3", camW + xVidPos), XML.getValue("SRC:Y3", camH + yVidPos), 0);
+	srcPositions[3].set(XML.getValue("SRC:X4", xVidPos), XML.getValue("SRC:Y4", camH + yVidPos), 0);
 
     dstPositions  = new ofPoint[4];
     dstPositions[0].set(0, 0, 0);
     dstPositions[1].set(kinect.width, 0, 0);
     dstPositions[2].set(kinect.width, kinect.height, 0);
     dstPositions[3].set(0, kinect.height, 0);
+
+   wichPoints = true;
 
 }
 
@@ -142,8 +158,6 @@ void testApp::drawKeystone(){
 //--------------------------------------------------------------
 void testApp::update() {
 
-
-
     nearThreshold2 = nearThreshold - panelsDiff;
     farThreshold2 = farThreshold - panelsDiff;
 
@@ -177,7 +191,7 @@ void testApp::update() {
 
         computePanels(grayImage, frontPanelGradient, backPanelGradient, nearThreshold, nearThreshold2, farThreshold, farThreshold2);
         isPixelBetweenPanels(grayImage, frontPanelGradient, backPanelGradient);
-        
+
         warpedImage.warpIntoMe(grayImage, srcPositions, dstPositions);
     }
 
@@ -206,8 +220,8 @@ void testApp::draw() {
           ofDrawBitmapString(ofToString(corrAngle)+" "+ofToString(kAngle), panelsCtls[0].x+20, panelsCtls[0].y-40);
 
        }
-        grayImage.draw(960, 0, 320, 240);
-
+        //grayImage.draw(960, 0, 320, 240);
+        warpedImage.draw(960, 0, 320, 240);
 
         kinect.drawDepth(640, 0, 320, 240);
         ofDrawBitmapString("DEPTH", 650, 10);
@@ -247,7 +261,7 @@ void testApp::keyPressed (int key) {
           savedBackGradient.saveImage("/home/ekko/Desktop/back.png", OF_IMAGE_QUALITY_BEST);
         break;
 
-        case 'r':
+        case 't':
             panelsDiff ++;
         break;
         case 'e':
@@ -270,6 +284,56 @@ void testApp::keyPressed (int key) {
           kinectAngle--;
           if(kinectAngle<-30) kinectAngle=-30;
           kinect.setCameraTiltAngle(kinectAngle);
+        break;
+
+        case OF_KEY_LEFT:
+
+
+            if(wichPoints){
+              srcPositions[2].x += 1;
+              srcPositions[3].x -= 1;
+
+            }else{
+              srcPositions[0].x += 1;
+              srcPositions[1].x -= 1;
+            }
+        break;
+        case OF_KEY_RIGHT:
+
+            if(wichPoints){
+
+              srcPositions[2].x -= 1;
+              srcPositions[3].x += 1;
+
+
+            }else{
+
+              srcPositions[0].x -= 1;
+              srcPositions[1].x += 1;
+
+            }
+        break;
+        case 'y':
+          wichPoints = !wichPoints;
+        break;
+        case 'r':
+          srcPositions[0].set(0, 0, 0);
+          srcPositions[1].set(kinect.width, 0, 0);
+          srcPositions[2].set(kinect.width, kinect.height, 0);
+          srcPositions[3].set(0, kinect.height, 0);
+        break;
+        case: 's':
+          XML.setValue("SRC:X1", srcPositions[0].x);
+
+            XML.setValue("SRC:Y1", srcPositions[0].y);
+            XML.setValue("SRC:X2", srcPositions[1].x);
+            XML.setValue("SRC:Y2", srcPositions[1].y);
+            XML.setValue("SRC:X3", srcPositions[2].x);
+            XML.setValue("SRC:Y3", srcPositions[2].y);
+            XML.setValue("SRC:X4", srcPositions[3].x);
+            XML.setValue("SRC:Y4", srcPositions[3].y);
+
+            XML.saveFile("corners.xml");
         break;
       }
 }

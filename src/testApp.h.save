@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
+#include "ofxXmlSettings.h"
+
 
 
 class testApp : public ofBaseApp {
@@ -49,15 +51,14 @@ public:
   void computePanels(ofxCvGrayscaleImage & gray, ofxCvGrayscaleImage & frontGradient, ofxCvGrayscaleImage & backGradient, int & near1, int & near2, int & far1, int & far2);
   void isPixelBetweenPanels(ofxCvGrayscaleImage & gray, ofxCvGrayscaleImage & frontGradient, ofxCvGrayscaleImage & backGradient);
   void drawGoodPoints(ofxCvGrayscaleImage & gray);
-  
-  void drawKeystone();
-  ///warp stuff
-        ofRectangle             warpGui;
-        ofPoint *				srcPositions;
-        ofPoint *				dstPositions;
-        int                     activePoint;
-        int                     wichPoint, xVidPos, yVidPos;
 
+  void drawKeystone();
+  //warp stuff
+  ofPoint *				srcPositions;
+  ofPoint *				dstPositions;
+  bool wichPoints;
+  
+  ofxXmlSettings          XML;
 
 
 };
